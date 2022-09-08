@@ -16,6 +16,7 @@
 
 There are some ~~pretty weird~~ things commented, ignore them
 ]]
+local IsOpen
 local function IsAcrylicUsed()
 	return not require(game.ReplicatedStorage.PreloadService.Settings).UseArcylic
 end
@@ -33,7 +34,7 @@ script.Parent.Main.Header.ScaleType = Enum.ScaleType.Crop
 local UIS = game:GetService("UserInputService")
 --//NAVIGATION\\--
 
-local mainNav = script.Parent.Main.bottom
+
 local expandedNav = script.Parent.Main.expanded
 local menuDB = false
 local last2
@@ -99,7 +100,7 @@ local function NewNotification(admin, bodytext, headingtext, image, dur)
 	Placeholder2:Destroy()
 end
 
-for i, v in ipairs(mainNav.buttons:GetChildren()) do
+for i, v in ipairs(script.Parent.Main.Dock.buttons:GetChildren()) do
 	local frame = string.sub(v.Name, 2,100)
 	v.TextButton.MouseButton1Click:Connect(function()
 		if v.Name == "AMinimize" then return end
@@ -112,9 +113,6 @@ for i, v in ipairs(mainNav.buttons:GetChildren()) do
 			last = frame
 			task.wait(require(game.ReplicatedStorage.PreloadService.Settings).PanelLoadingTime)
 			script.Parent.Main[frame].Visible = true
-			v.BackgroundTransparency = 0
-			v.BackgroundColor3 = Theme.AccentColor
-			script.Parent.Main.bottom.buttons[last2].BackgroundTransparency = 1
 			task.wait(0.2)
 			script.Parent.Main.Animation:TweenSizeAndPosition(UDim2.new(0,0,1,0), UDim2.new(1,0,0,0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
 			task.wait(.2)
@@ -146,11 +144,16 @@ local function Open()
 	end
 	local Main = script:FindFirstAncestorOfClass("ScreenGui"):FindFirstChildOfClass("Frame")
 	Main.Visible = true
-	TS:Create(Main, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+	TS:Create(Main, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 		Position = UDim2.fromScale(Main.Position.X.Scale, Main.Position.Y.Scale - 0.05);
 		BackgroundTransparency = 0;
 	}):Play()
 	for _, Descendant in pairs(Main:GetDescendants()) do
+		if Descendant:IsA("Frame") and not Descendant:GetAttribute("ExcludeTransparent") then
+			TS:Create(Descendant, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				BackgroundTransparency = 0
+			}):Play()
+		end
 		if Descendant:IsA("TextLabel") then
 			TS:Create(Descendant, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 				TextTransparency = 0
@@ -167,12 +170,9 @@ local function Open()
 				BackgroundTransparency = 0
 			}):Play()
 		end
-		if Descendant:IsA("Frame") and not Descendant:GetAttribute("ExcludeTransparent") then
-			TS:Create(Descendant, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-				BackgroundTransparency = 0
-			}):Play()
-		end
 	end
+	task.wait(.6)
+	IsOpen = true
 end
 local function Close()
 	script.Parent:SetAttribute("IsVisible", false)
@@ -180,14 +180,15 @@ local function Close()
 		neon:UnbindFrame(script.Parent.Main.Blur)
 	end
 	local Main = script:FindFirstAncestorOfClass("ScreenGui"):FindFirstChildOfClass("Frame")
-	TS:Create(Main, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+	TS:Create(Main, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 		Position = UDim2.fromScale(Main.Position.X.Scale, Main.Position.Y.Scale + 0.05);
 		Transparency = 1;
 	}):Play()
 	for _, Descendant in pairs(Main:GetDescendants()) do
 		if Descendant:IsA("ImageLabel") then
 			TS:Create(Descendant, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-				ImageTransparency = 1
+				ImageTransparency = 1,
+				BackgroundTransparency = 1
 			}):Play()
 		elseif Descendant:IsA("GuiObject") then
 			TS:Create(Descendant, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
@@ -212,6 +213,9 @@ game:GetService("UserInputService").InputBegan:Connect(function(key, typing)
 		if menuDB == false then
 			Open()
 			PlaySFX()
+			repeat task.wait() until IsOpen
+			print("is)")
+			script.Parent.Main.Position = UDim2.new(0.174, 0,0.184, 0)
 			menuDB = true
 		else
 			Close()
