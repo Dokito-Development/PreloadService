@@ -4,12 +4,16 @@ The following is all essential to providing the core functions, and exploit prot
 I advise you do not modify any code, but I cant stop you.
 IF YOU MODIFY CODE I WILL NOT OFFER SUPPORT
 ]]
-local CurrentVers = "2.3"
-local adminIDs = require(script.Admins).Admins
-local players = game:GetService("Players")
+
+
+------
+print("PRELOADSERVICE \n Starting up...")
+local CurrentVers = "2.3.1.1" --DO NOT MODIFY THIS VALUE
+--// Notification function. \\--
+-- Moved it back for now
+--Actual code
 local moduleNotRequire = script.PreloadService
 moduleNotRequire.Parent = game.ReplicatedStorage
-local LoadedModules = {}
 local Remotes = Instance.new("Folder")
 Remotes.Name = "PSRemotes"
 Remotes.Parent = game.ReplicatedStorage
@@ -30,6 +34,19 @@ e2.Name = "TPRemote"
 local e3 = Instance.new("RemoteEvent")
 e3.Parent = Remotes
 e3.Name = "CheckForUpdates"
+print("Started.")
+-- The following code remakes the admin code to make sure nobody can get into it. It's Server-Sided but it's still nice to have an extra layer.
+--[[
+local AdminsScript = script.Admins:Clone()
+script.Admins:Destroy()
+AdminsScript.Parent = script
+AdminsScript.Name = 'PS_Admins_'..game:GetService("HttpService"):GenerateGUID(false)
+]]
+local AdminsScript = script.Admins
+local AdminIDs = require(AdminsScript).Admins
+local GroupIDs = require(AdminsScript).Groups
+local players = game:GetService("Players")
+local LoadedModules = {}
 local InGameAdmins = {}
 local Settings = require(game.ReplicatedStorage.PreloadService.Settings)
 local PS = require(game.ReplicatedStorage.PreloadService)
@@ -63,6 +80,7 @@ KickRem.OnServerEvent:Connect(function(player,plrkicked)
 		end
 	end
 end)
+
 local function n(admin, bodytext, headingtext, image, dur, t)
 	local Placeholder  = Instance.new("Frame")
 	Placeholder.Parent = admin.PlayerGui.PreloadServiceAdminPanel.Notifications
@@ -129,14 +147,81 @@ local function n(admin, bodytext, headingtext, image, dur, t)
 	notif:Destroy()
 	Placeholder2:Destroy()
 end
-
-function GetShortNumer(Number)
-	return math.floor(((Number < 1 and Number) or math.floor(Number) / 10 ^ (math.log10(Number) - math.log10(Number) % 3)) * 10 ^ (Decimals or 3)) / 10 ^ (Decimals or 3)..(({"k", "M", "B", "T", "Qa", "Qn", "Sx", "Sp", "Oc", "N"})[math.floor(math.log10(Number) / 3)] or "")
-end
 local function NewNotification(admin, bodytext, headingtext, image, dur, t)
 	task.spawn(n,admin,bodytext,headingtext,image,dur, t)
 end
 
+local function VersionCheck(plr, MAKE_THIS_FALSE)
+	task.wait(2)
+	if not table.find(InGameAdmins,plr) then
+		warn("ERROR: Unexpected call of CheckForUpdates")
+		plr:Kick("\n [PreloadService]: \n Unexpected Error:\n \n Exploits or non admin tried to fire CheckForUpdates. \n Developers, if this is in your code, then please do not fire it, that will result in players being kicked unexpectedly.\n Please only fire it from the Admin Panel, the remote is only for server communication. \n \n Error code 0x83jd29, end of error")
+		while task.wait(.5) do
+			warn("ERROR: Unexpected call of CheckForUpdates")
+		end
+	end
+	local VersModule = require(8788148542)
+	local Frame = plr.PlayerGui.PreloadServiceAdminPanel.Main.Menu.Main.BUpdate
+	if VersModule.Version ~= CurrentVers then
+		Frame.Parent.AInfo.vers.Text = CurrentVers.." by DarkPixlz, 2022".."(latest avail: "..VersModule.Version..", released "..VersModule.ReleaseDate.."."
+		warn("[PreloadService]: Out of date! Please update your module by closing this server.")
+		Frame.Value.Value = tostring(math.random(1,100000000))
+		NewNotification(plr, "Your module is out of date. Please update your module by closing the servers, then replace it in Studio.", "Version check complete", "rbxassetid://9894144899", 10)
+	else
+		Frame.Parent.AInfo.vers.Text = CurrentVers.." by DarkPixlz, 2022. Released "..VersModule.ReleaseDate.."."
+	end
+end
+local function New(plr)
+	print("NEW ADMIN")
+	table.insert(InGameAdmins, plr)
+	local NewPanel = script.PreloadServiceAdminPanel:Clone() --To avoid exploits, this all happens on the server ;)
+	NewPanel.Parent = plr.PlayerGui
+	VersionCheck(plr, true)
+	if game:GetService("RunService"):IsStudio() then
+		NewPanel.Main.Header.ErrorFrame.Visible = true
+		NewNotification(plr,"Sorry, but PreloadService Admin does not work in Studio. Pages do not operate and display data.","Error!","rbxassetid://9894144899",15, true)
+	else
+		task.spawn(NewNotification,plr,"Please wait, loading Admin Panel","Loading PreloadService Admin Panel v"..CurrentVers,"rbxassetid://9894144899", 8)
+	end
+
+	for i, asset in pairs(NewPanel:GetDescendants()) do
+		local succ, err = pcall(function()
+			game:GetService("ContentProvider"):PreloadAsync({asset})
+		end)
+		if not succ then
+			warn(asset.Name.." could not load. Error: "..err)
+			NewNotification(plr,"Could not load "..asset.Name..", continuing to load...", "Could not load item!","rbxassetid://9894144899", 5)
+		end
+	end
+	local Frame = plr.PlayerGui.PreloadServiceAdminPanel.Main.Menu.Main.BUpdate
+	Frame.Parent.AInfo.vers.Text = CurrentVers.." by DarkPixlz, 2022. Licensed under TBD."
+	NewNotification(plr,"PreloadSerevice Admin Panel v"..CurrentVers.." loaded! Press F2 to enter the panel.","Welcome!","rbxassetid://10012255725",15)
+
+end
+players.PlayerAdded:Connect(function(plr)
+	-- Do the player counts first so if we need to return we can
+	local NewPlayerCount = #players:GetPlayers()
+	PlrCount += 1
+	NewPlayerClient:FireAllClients(PlrCount)
+	if table.find(AdminIDs, plr.UserId) then
+		--		print(players:GetNameFromUserIdAsync(game.CreatorId).." is a furry")
+		New(plr)
+	else
+		--may be in group?
+		for i, v in ipairs(GroupIDs) do
+			if plr:IsInGroup(v) then
+				New(plr)
+				return
+			end
+		end
+	end
+--[[
+	local ver = require(8788148542).Version
+	if ver~=2.0 then
+		warn("outofdate_err")
+	end 
+]]
+end)
 
 local function GetTimeWithSeconds(Seconds)
 	local Minutes = (Seconds - Seconds%60)/60;
@@ -147,25 +232,28 @@ local function GetTimeWithSeconds(Seconds)
 
 	return Format(Hours)..":"..Format(Minutes)..":"..Format(Seconds);
 end
+function GetShortNumer(Number)
+	return math.floor(((Number < 1 and Number) or math.floor(Number) / 10 ^ (math.log10(Number) - math.log10(Number) % 3)) * 10 ^ (Decimals or 3)) / 10 ^ (Decimals or 3)..(({"k", "M", "B", "T", "Qa", "Qn", "Sx", "Sp", "Oc", "N"})[math.floor(math.log10(Number) / 3)] or "")
+end
 local CurrentlyExisting = 0
 --Thanks to @334901766 for helping out a bit
 local function MakeHomeHistoryBox(Admin,PFP,Username,InstanceName,InstanceType,Time)
-	CurrentlyExisting = #Admin.PlayerGui.PreloadServiceAdminPanel.Main.AHome.HistoryWidget:GetChildren()
-	if CurrentlyExisting >= 50 then
-		for i = 1, (CurrentlyExisting - 50) do
-			Admin.PlayerGui.PreloadServiceAdminPanel.Main.AHome.HistoryWidget:FindFirstChildWhichIsA("Frame"):Destroy()
+	CurrentlyExisting = #Admin.PlayerGui.PreloadServiceAdminPanel.Main.Home.HistoryWidget:GetChildren()
+	if CurrentlyExisting >= 49 then
+		for i = 1, (CurrentlyExisting - 49) do
+			Admin.PlayerGui.PreloadServiceAdminPanel.Main.Home.HistoryWidget:FindFirstChildWhichIsA("Frame"):Destroy()
 		end
 	end
-	CurrentlyExisting = #Admin.PlayerGui.PreloadServiceAdminPanel.Main.AHome.HistoryWidget:GetChildren()
+	CurrentlyExisting = #Admin.PlayerGui.PreloadServiceAdminPanel.Main.Home.HistoryWidget:GetChildren()
 
-	local NewCard = Admin.PlayerGui.PreloadServiceAdminPanel.Main.AHome.Template:Clone()
-	NewCard.Parent =Admin.PlayerGui.PreloadServiceAdminPanel.Main.AHome.HistoryWidget
+	local NewCard = Admin.PlayerGui.PreloadServiceAdminPanel.Main.Home.Template:Clone()
+	NewCard.Parent =Admin.PlayerGui.PreloadServiceAdminPanel.Main.Home.HistoryWidget
 	NewCard.Visible = true
 	NewCard.Name = CurrentlyExisting
 	NewCard.PlayerImage.Image = PFP
 	NewCard.Username.Text = "@"..Username
 	NewCard.Time.Text = Time
-	NewCard.Type.Text = InstanceName
+	NewCard.ItemName.Text = InstanceName
 end
 
 local function MakeHistory(Admin,PFP,Username,InstanceName,InstanceType,Time)
@@ -177,26 +265,26 @@ local function MakeHistory(Admin,PFP,Username,InstanceName,InstanceType,Time)
 	end
 	CurrentlyExisting = #Admin.PlayerGui.PreloadServiceAdminPanel.Main.History.MainFrame:GetChildren()
 
-	local NewCard = Admin.PlayerGui.PreloadServiceAdminPanel.Main.History.Template:Clone()
+	local NewCard = Admin.PlayerGui.PreloadServiceAdminPanel.Main.Home.Template:Clone()
 	NewCard.Parent =Admin.PlayerGui.PreloadServiceAdminPanel.Main.History.MainFrame
 	NewCard.Visible = true
 	NewCard.Name = CurrentlyExisting
 	NewCard.PlayerImage.Image = PFP
 	NewCard.Username.Text = "@"..Username
 	NewCard.Time.Text = Time
-	NewCard.Type.Text = InstanceName
+	NewCard.ItemName.Text = InstanceName
 end
 local function MakeModuleHistoryCard(Admin,PFP,Username,InstanceName,InstanceType,Time)
-	CurrentlyExisting = #Admin.PlayerGui.PreloadServiceAdminPanel.Main.AHome.HistoryWidget:GetChildren()
+	CurrentlyExisting = #Admin.PlayerGui.PreloadServiceAdminPanel.Main.Home.HistoryWidget:GetChildren()
 	if CurrentlyExisting >= 50 then
 		for i = 1, (CurrentlyExisting - 50) do
-			Admin.PlayerGui.PreloadServiceAdminPanel.Main.AHome.HistoryWidget:FindFirstChildWhichIsA("Frame"):Destroy()
+			Admin.PlayerGui.PreloadServiceAdminPanel.Main.Home.HistoryWidget:FindFirstChildWhichIsA("Frame"):Destroy()
 		end
 	end
-	CurrentlyExisting = #Admin.PlayerGui.PreloadServiceAdminPanel.Main.AHome.HistoryWidget:GetChildren()
+	CurrentlyExisting = #Admin.PlayerGui.PreloadServiceAdminPanel.Main.Home.HistoryWidget:GetChildren()
 
-	local NewCard = Admin.PlayerGui.PreloadServiceAdminPanel.Main.AHome.Template:Clone()
-	NewCard.Parent =Admin.PlayerGui.PreloadServiceAdminPanel.Main.AHome.HistoryWidget
+	local NewCard = Admin.PlayerGui.PreloadServiceAdminPanel.Main.Home.Template:Clone()
+	NewCard.Parent =Admin.PlayerGui.PreloadServiceAdminPanel.Main.Home.HistoryWidget
 	NewCard.Visible = true
 	NewCard.Name = CurrentlyExisting
 	NewCard.PlayerImage.Image = PFP
@@ -206,64 +294,7 @@ local function MakeModuleHistoryCard(Admin,PFP,Username,InstanceName,InstanceTyp
 end
 
 
-local function VersionCheck(plr)
-	task.wait(2)
-	if not table.find(InGameAdmins,plr) then
-		warn("ERROR: Unexpected call of CheckForUpdates")
-		plr:Kick("\n [PreloadService]: \n Unexpected Error:\n \n Exploits or non admin tried to fire CheckForUpdates. \n Developers, if this is in your code, then please do not fire it, that will result in players being kicked unexpectedly.\n Please only fire it from the Admin Panel, the remote is only for server communication. \n \n Error code 0x83jd29, end of error")
-		while task.wait(.5) do
-			warn("ERROR: Unexpected call of CheckForUpdates")
-		end
-	end
-	local VersModule = require(8788148542)
-	local Frame = plr.PlayerGui.PreloadServiceAdminPanel.Main.Menu.Main.BUpdate
-	Frame.Parent.AInfo.vers.Text = CurrentVers.." by DarkPixlz, 2022".."(latest avail: "..VersModule.Version..", released "..VersModule.ReleaseDate..". Licensed under TBD."
-	if VersModule.Version ~= CurrentVers then
-		warn("[PreloadService]: Out of date! Please update your module by closing this server.")
-		Frame.Value.Value = tostring(math.random(1,100000000))
-		NewNotification(plr, "Your module is out of date. Please update your module by closing the servers, then replace it in Studio.", "Version check complete", "rbxassetid://9894144899", 10)
-	end
-end
 
-players.PlayerAdded:Connect(function(plr)
-	if table.find(adminIDs, plr.UserId) then
-		--		print(players:GetNameFromUserIdAsync(game.CreatorId).." is a furry")
-		local newPanel = script.PreloadServiceAdminPanel:Clone() --To avoid exploits, this all happens on the server ;)
-		newPanel.Parent = plr.PlayerGui
-
-		if game:GetService("RunService"):IsStudio() then
-			NewNotification(plr,"Sorry, but PreloadService Admin does not work in Studio. Pages do not operate and display data.","Error!","rbxassetid://9894144899",15, true)
-		else
-			task.spawn(NewNotification,plr,"Please wait, loading Admin Panel","Loading PreloadService Admin Panel v"..CurrentVers,"rbxassetid://9894144899", 8)
-		end
-
-		for i, asset in pairs(newPanel:GetDescendants()) do
-			local succ, err = pcall(function()
-				game:GetService("ContentProvider"):PreloadAsync({asset})
-			end)
-			if not succ then
-				warn(asset.Name.." could not load. Error: "..err)
-			end
-		end
-		table.insert(InGameAdmins, plr)
-		local Frame = plr.PlayerGui.PreloadServiceAdminPanel.Main.Menu.Main.BUpdate
-		Frame.Parent.AInfo.vers.Text = CurrentVers.." by DarkPixlz, 2022. Licensed under TBD."
-		NewNotification(plr,"PreloadSerevice Admin Panel v"..CurrentVers.." loaded! Press F2 to enter the panel.","Welcome!","rbxassetid://10012255725",15)
-
-	end
-	game:GetService("Players").PlayerRemoving:Connect(function()
-
-	end)
-	local newPlrCount = #players:GetPlayers()
-	PlrCount += newPlrCount
-	NewPlayerClient:FireAllClients(PlrCount)
---[[
-	local ver = require(8788148542).Version
-	if ver~=2.0 then
-		warn("outofdate_err")
-	end 
-	]]
-end)
 players.PlayerRemoving:Connect(function(plr)
 	if table.find(InGameAdmins, plr) then
 		table.remove(InGameAdmins, table.find(InGameAdmins, plr))
@@ -294,13 +325,13 @@ SpecialEvent.OnServerEvent:Connect(function(PlayerLoaded, Time, ItemClass, ItemN
 				ItemClass,
 				GetTimeWithSeconds(Time)
 			)
-			local Home = Frame.Parent.Parent.AHome
+			local Home = Frame.Parent.Parent.Home
 			Home.total.Text = GetShortNumer(#CompletedTimes).." total assets loaded"
 			Home.avg.Text = GetTimeWithSeconds(Average(CompletedTimes)).." average loading time, or lower"
 			Home.server.Text = GetShortNumer(ServerLifetime).." assets loaded in server lifetime"
 		else
 			table.insert(LoadedModules, item)
-			local new = Frame.Template:Clone()
+			local new = Frame.Parent.Template:Clone()
 			new.Visible = true
 			new.Parent = Frame
 			new.ItemName.Text = "Loaded "..ItemName
@@ -312,7 +343,7 @@ SpecialEvent.OnServerEvent:Connect(function(PlayerLoaded, Time, ItemClass, ItemN
 			end
 			new.Username.Text = PlayerLoaded.DisplayName.."(@"..PlayerLoaded.Name..")"
 			task.wait(Settings.renderTime)
-			new.thumbnail.Image = players:GetUserThumbnailAsync(PlayerLoaded.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+			new.PlayerImage.Image = players:GetUserThumbnailAsync(PlayerLoaded.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
 			--History
 			local new = Frame.Parent.Parent.Modules.MainFrame.Template:Clone()
 			new.Visible = true
@@ -322,12 +353,12 @@ SpecialEvent.OnServerEvent:Connect(function(PlayerLoaded, Time, ItemClass, ItemN
 			new.Time.Text = GetTimeWithSeconds(Time).." or lower"
 			new.Username.Text = PlayerLoaded.DisplayName.."(@"..PlayerLoaded.Name..")"
 			new.thumbnail.Image = players:GetUserThumbnailAsync(PlayerLoaded.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
-			local Home = Frame.Parent.Parent.AHome
+			local Home = Frame.Parent.Parent.Home
 			local ModulesFrame = Frame.Parent.Parent.Modules
 			Home.total.Text = GetShortNumer(#CompletedTimes).." total assets loaded"
 			--			Home.server.Text = GetShortNumer(ServerLifetime).." assets loaded in server lifetime"
 			--			print(Home.server.Text..", "..ServerLifetime)
-			if not (GetTimeWithSeconds(Time) == "00:00:00") then
+			if GetTimeWithSeconds(Time) ~= "00:00:00" then
 				Home.avg.Text = GetTimeWithSeconds(Average(CompletedTimes)).." Average Loading Time"
 			else
 				Home.avg.Text = "🎉 Average is 0 or lower!"
@@ -342,9 +373,9 @@ SpecialEvent.OnServerEvent:Connect(function(PlayerLoaded, Time, ItemClass, ItemN
 	end
 end)
 
+-- I'm not exactly sure why this exists and not just VersionCheck() but we're going with it
 e3.OnServerEvent:Connect(function(plr)
 	task.wait(2)
-	--[[
 	if not table.find(InGameAdmins,plr) then
 		warn("ERROR: Unexpected call of CheckForUpdates")
 		plr:Kick("\n [PreloadService]: \n Unexpected Error:\n \n Exploits or non admin tried to fire CheckForUpdates. \n Developers, if this is in your code, then please do not fire it, that will result in players being kicked unexpectedly.\n Please only fire it from the Admin Panel, the remote is only for server communication. \n \n Error code 0x83jd29, end of error")
@@ -352,11 +383,10 @@ e3.OnServerEvent:Connect(function(plr)
 			warn("ERROR: Unexpected call of CheckForUpdates")
 		end
 	end
-	]]
 	local VersModule = require(8788148542)
 	VersModule.Parent = script
 	local Frame = plr.PlayerGui.PreloadServiceAdminPanel.Main.Menu.Main.BUpdate
-	Frame.Parent.AInfo.vers.Text = CurrentVers.." by DarkPixlz, 2022".."(latest avail: "..VersModule.Version..", released "..VersModule.ReleaseDate..". Licensed under TBD."
+	Frame.Parent.AInfo.vers.Text = CurrentVers.." by DarkPixlz, 2022".."(latest avail: "..VersModule.Version..", released "..VersModule.ReleaseDate..")."
 	Frame.Value.Value = tostring(math.random(1,100000000))
 	Frame.Parent.CLogs.log.Text = VersModule.ReleaseNotes
 	Frame.Parent.CLogs.title.Text = "Update Logs (v"..VersModule.Version..")"
