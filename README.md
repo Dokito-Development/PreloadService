@@ -1,4 +1,7 @@
 # PreloadService
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/05a9f8ffba6f42e2899a2ad8d1cdf54d)](https://app.codacy.com/gh/darkpixlz/PreloadService?utm_source=github.com&utm_medium=referral&utm_content=darkpixlz/PreloadService&utm_campaign=Badge_Grade_Settings)
+
 ---
 
 Welcome to PreloadService!
