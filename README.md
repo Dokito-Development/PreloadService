@@ -1,4 +1,4 @@
-# PreloadService
+![PreloadService](https://github.com/Dokito-Development/PreloadService/blob/eea1a31bea9f8a45e5f01987372c2840d50cd72a/PreloadService.png)
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/05a9f8ffba6f42e2899a2ad8d1cdf54d)](https://app.codacy.com/gh/darkpixlz/PreloadService?utm_source=github.com&utm_medium=referral&utm_content=darkpixlz/PreloadService&utm_campaign=Badge_Grade_Settings)
 
