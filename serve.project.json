@@ -2,8 +2,8 @@
   "name": "PreloadService",
   "tree": {
     "$className": "DataModel",
-    "ServerScriptService": {
-      "$className": "ServerScriptService",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
       "PreloadService": {
         "$path": "default.project.json"
       }
