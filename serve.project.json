@@ -1,0 +1,12 @@
+{
+  "name": "PreloadService",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "PreloadService": {
+        "$path": "default.project.json"
+      }
+    }
+  }
+}
