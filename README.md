@@ -37,7 +37,7 @@ Created by
 # <!-- this makes thin line -->
 
 ## Downloads
-- [Get it with Roblox][ps/roblox/download]
+- [Get it on Roblox][ps/roblox/download]
 
 ## Contributing
 PreloadService is open to contributors, as long as you follow our [Contributing guidelines][ps/github/contributing] (**TODO**).
