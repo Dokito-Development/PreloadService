@@ -21,13 +21,7 @@
 
 Created by
 
-[<img alt="Dokito" src="/assets/dokito-logo-no-background.png" width=200>][dokito/github]
-
-</div>
-
----
-
-<div align="center">
+# <img alt="Dokito" src="/assets/dokito-logo-no-background.png" width=200>][dokito/github]
 
 [![Get it on Roblox][icons/roblox-dev]][ps/roblox/download]
 [![View source on Github][icons/github]][ps/github]
@@ -40,7 +34,8 @@ Created by
 
 </div>
 
----
+# <!-- this makes thin line -->
+
 ## Downloads
 - [Get it with Roblox][ps/roblox/download]
 
