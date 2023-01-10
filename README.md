@@ -21,7 +21,7 @@
 
 Created by
 
-# <img alt="Dokito" src="/assets/dokito-logo-no-background.png" width=200>][dokito/github]
+# [<img alt="Dokito" src="/assets/dokito-logo-no-background.png" width=200>][dokito/github]
 
 [![Get it on Roblox][icons/roblox-dev]][ps/roblox/download]
 [![View source on Github][icons/github]][ps/github]
