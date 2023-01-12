@@ -4,7 +4,7 @@
 [ps/github]: https://github.com/Dokito-Development/PreloadService
 [ps/roblox/download]: https://www.roblox.com/library/8786906886/-
 [ps/roblox/post]: https://devforum.roblox.com/t/-/1663119
-[dokito/github]: https://github.com/Dokito-Development
+[dokito/github]: https://github.com/Dokito-Development/PreloadService
 [ps/discord]: https://discord.gg/c8dC4k3J5Y
 
 [ps/logo]: /assets/preloadservice-logo.png
@@ -30,14 +30,30 @@ Created by
 
 [![Codacy Badge][ps/codacy/badge]][ps/codacy/link]
 
-**PreloadService is a loading module + admin panel that's highly customizable, powerful and open source - built for Roblox.**
+# PreloadService 🚀
+PreloadService is a project that uses Roblox's Content Provider services to load content into a Roblox game. It is designed to be faster than custom alternatives, ensuring a smooth and seamless gaming experience for players.
 
-</div>
+## Features 📋
+Utilizes Roblox's Content Provider services for efficient content loading
+Faster than custom alternatives
+Easy to implement and integrate into your game
+Completely Free UI for you to use
+Highly Modular Admin Panel
 
-# <!-- this makes thin line -->
+## Getting Started 🚦
+1. Get the code off Roblox
+2. Move to ServerScriptService, configure admins + settings
+3. Use the API to make it load items in your game 
+4. Test the service in your game and enjoy faster content loading!
 
-## Downloads
-- [Get it on Roblox][ps/roblox/download]
+## Contribute 🛠
+PreloadService is an open-source project and contributions are welcome. If you would like to contribute, please fork the repository and submit a pull request.
 
-## Contributing
-PreloadService is open to contributors, as long as you follow our [Contributing guidelines][ps/github/contributing] (**TODO**).
+## Support 💬
+If you have any questions or issues, please open an issue on the GitHub repository or contact the tema directly via the forum or Discord. We will do our best to assist you.
+
+## License 📜
+PreloadService is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+
+##  🎉 Happy Gaming!
+<!-- goodbye markdown --> - The PreloadService Team
